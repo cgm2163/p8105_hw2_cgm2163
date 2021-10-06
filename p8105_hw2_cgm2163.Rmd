@@ -1,0 +1,22 @@
+---
+title: "p8105_hw2_cgm2163"
+output: html_document
+---
+
+# Problem 1
+
+After creating a public GitHub repo and local R project, we should upload the _tidyverse_ library as well as the *Mr. Trash Wheel* dataset.
+
+```{r}
+
+library(tidyverse)
+
+library(readxl)
+trash_wheel_data = read_excel("./Trash-Wheel-Collection-Totals-8-6-19.xlsx", 
+      sheet = ("2018 Precipitation")
+        
+      )  
+                              
+
+
+```
