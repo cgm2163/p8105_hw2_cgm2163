@@ -5,18 +5,227 @@ output: html_document
 
 # Problem 1
 
-After creating a public GitHub repo and local R project, we should upload the _tidyverse_ library as well as the *Mr. Trash Wheel* dataset.
+After creating a public GitHub repo and local R project, we should upload the _tidyverse_ library.
 
 ```{r}
 
 library(tidyverse)
 
+```
+
+Next, we can upload and clean the **Mr. Trash Wheel** dataset, making sure to create variables with appropriate naming conventions, omitting any non-dumpster specific columns.
+
+```{r}
+
 library(readxl)
-trash_wheel_data = read_excel("./Trash-Wheel-Collection-Totals-8-6-19.xlsx", 
-      sheet = ("2018 Precipitation")
-        
-      )  
-                              
+
+# read sheet 1 of the trash wheel collection data set
+
+trash_wheel_data = 
+  
+  read_excel("./Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = 1) %>%
+  
+  # convert names to lower case snake case
+  
+  janitor::clean_names() %>%
+  
+  # create a new variable that rounds the "sports_balls" variable to the nearest integer
+  
+  mutate(sport_ball = round(sports_balls, digits = 0)) %>%
+  
+    #select only these variables determined to contain dumpster-specific data, omitting sports_balls, made redundant by the previous step
+  
+  select(dumpster, month, year, date, weight_tons, volume_cubic_yards,plastic_bottles, polystyrene, cigarette_butts, glass_bottles, grocery_bags, chip_bags, homes_powered, sport_ball) %>%
+  
+  # omit any rows that do not have complete data for the variable dumpster
+  
+  drop_na(dumpster)
+
+```
+
+Next, we must clean the **precipitation data** from _2018_.
+
+```{r}
+
+library(readxl)
+
+# read the 2018 precipitation data sheet, skipping the first row and beginning columns are titles
+
+precip_18 = read_excel("./Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = ("2018 Precipitation"), skip = 1, col_names = TRUE) %>%
+      
+      #rename the variable "Total" as "precipitation_inches"
+  
+      rename(precipitation_inches = Total) %>%
+  
+      #create a variable called year that is equal to 2018 for all         values
+  
+      mutate(year = 2018) %>%
+  
+      # omit any rows which do not have complete data for          precipitation_inches and Month
+  
+      drop_na(precipitation_inches, Month)
+
+```
+
+Then, we can upload and clean the **precipitation data** from _2019_.
+
+```{r}
+
+# read the 2019 precipitation data sheet, skipping the first row and beginning columns are titles
+
+precip_19 = read_excel("./Trash-Wheel-Collection-Totals-8-6-19.xlsx", 
+      sheet = ("2019 Precipitation"), skip = 1, col_names = TRUE) %>%
+  
+  
+    #rename the variable "Total" as "precipitation_inches"
+  
+    rename(precipitation_inches = Total) %>%
+  
+    #create a variable called year that is equal to 2019 for all               values
+  
+    mutate(year = 2019) %>%
+  
+    #omit any rows that do not have complete data for precipitation or month
+  
+    drop_na(precipitation_inches, Month) 
+
+```
+
+
+Now that we have created and cleaned two distinct sheets for our precipitation data, we can join them together to make them more concise.
+
+```{r}
+# create a new data set that includes all data points from both the cleaned 2018 and 2019 precipitation data sets.
+
+precip_18_19 =
+  full_join(precip_18, precip_19) %>%
+  # write over variable Month using month.name function to convert numeric months to month names
+  
+  mutate(Month = month.name[Month])
+
+```
+
+In _trash_wheel_data_, there are `r count(trash_wheel_data)` observations.
+
+Key variables include dumpster number, month, date, and number of cigarette 
+butts, plastic bottles, and other trash collected.
+
+
+The median number of sports balls in a dumpster in 2019 was `r median(trash_wheel_data$sport_ball[trash_wheel_data$year == 2019]) `.
+
+In _precip_18_19_, there are `r count(precip_18_19)` observations. Key variables 
+include month, year, and precipitation inches. The total precipitation in 2018 was `r sum(precip_18_19$precipitation_inches[precip_18_19$year == 2018]) ` inches.
+
+
+# Problem 2
+
+After downloading the FiveThirtyEight data, we can upload the **pols-month** data set.
+
+```{r}
+
+# read sheet 1 of the trash wheel collection data set
+
+pols_month_data = 
+  
+  read.csv("./pols-month.csv")
+
+# use separate to break up mon into integer variables of day, month, and year
+
+# replace month number with month name
+
+#create a president variable with values gop and dem, omitting prezdem and prezgop variables 
+
+#remove the day variable
+
+view(pols_month_data)
+
+```
+
+Next, we can upload and clean the **snp** dataset.
+
+```{r}
+
+# read sheet 1 of the trash wheel collection data set
+
+snp_data = 
+  
+  read.csv("./snp.csv")
+
+view(snp_data)
+
+# arrange dates similar to as above year and month should be leading columns
+
+```
+
+
+Then, we can upload and tidy the **unemployment** dataset.
+
+```{r}
+
+
+# read sheet 1 of the trash wheel collection data set
+
+unemployment_data = 
+  
+  read.csv("./unemployment.csv")
+
+view(unemployment_data)
+
+# switch wide into long
+
+# ensure key variables have the same names
+
+# ensure key variables take the same values
+
+```
+
+Now, we can join the three data sets we have just created.
+
+```{r}
+
+#join snp_data into pols_month and then merge unemployment_data into the result
+
+```
+
+Write a paragraph about the dataset- explain what each data set contained, and describe the resulting set: give the dimension, range of years, and names of key variables
+
+
+
+# Problem 3
+
+The **NYC Open dataset** on _baby name popularity_ can be assessed by uploading and tidying in Rstudio.
+
+```{r}
+
+# read sheet 1 of the trash wheel collection data set
+
+baby_names_data = 
+  
+  read.csv("./Popular_Baby_Names.csv")
+
+view(baby_names_data)
+
+# names of a categorical predicor and case structure of string variables has changed over time- needs to be fixed
+
+#some rows seem duplicated, which need to be removed (google "dplyr remove duplicate rows" to get started)
+
+```
+
+Next, we can do some analysis:
+
+```{r}
+
+# produce a reader-friendly table showing the rank in popularity of the name "olivia" as a female baby name over time; needs rows for ethnicities and columns for year
+
+#produce similar table showing most popular name among male children over time
+
+#for male, white non-hispanic children born in 2016, produce a scatter plot showing the number of children with a name (y axis) against the rank in popularity of that name (x axis)
 
 
 ```
+
+
+
+
+
+
