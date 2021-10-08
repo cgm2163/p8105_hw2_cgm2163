@@ -123,21 +123,31 @@ After downloading the FiveThirtyEight data, we can upload the **pols-month** dat
 
 ```{r}
 
-# read sheet 1 of the trash wheel collection data set
+# create a dataset from pols-month data
 
 pols_month_data = 
   
-  read.csv("./pols-month.csv")
+  read.csv("./pols-month.csv") %>%
+  
+  # separate mon variable into distinct columns of year, month, and date as integers
+  
+  separate(mon, c("Year", "Month_old", "day"), sep = "-", convert = TRUE) %>%
+  
+  # create a new variable based on Month that converts numeric to month names
 
-# use separate to break up mon into integer variables of day, month, and year
+  mutate(Month = month.abb[Month_old]) %>%
+  
+  # omit Month variable, made redundant by the last step
 
-# replace month number with month name
+  select(-Month_old) %>%
 
 #create a president variable with values gop and dem, omitting prezdem and prezgop variables 
 
-#remove the day variable
+  mutate(president = case_when(prez_gop > 0 ~ "gop", prez_dem > 0 ~ "dem")) %>%
+  
+# remove unneccessary variables
 
-view(pols_month_data)
+select(-prez_gop, -prez_dem, -day)
 
 ```
 
@@ -145,49 +155,75 @@ Next, we can upload and clean the **snp** dataset.
 
 ```{r}
 
-# read sheet 1 of the trash wheel collection data set
+# create a dataset from snp data
+
+library(lubridate)
 
 snp_data = 
   
-  read.csv("./snp.csv")
+  read.csv("./snp.csv") %>%
 
+  # read date variable as a type of date instead of character
+
+  mutate(date = mdy(date)) %>%
+
+  # separate date variable into distinct columns of year, month, and date
+  
+ separate(date, c("Year", "Month_old", "day"), sep = "-", convert = TRUE) %>%
+  
+   # create a new variable based on Month that converts numeric to month names
+  
+  mutate(Month = month.abb[Month_old]) %>%
+
+  # omit Month variable, made redundant by the last step
+  
+  select(-Month_old) %>%
+  
+  # move day and close columns to the back, moving year and month to lead
+  
+  select(-day, -close, everything())
+  
 view(snp_data)
 
 # arrange dates similar to as above year and month should be leading columns
 
 ```
 
-
 Then, we can upload and tidy the **unemployment** dataset.
 
 ```{r}
 
-
-# read sheet 1 of the trash wheel collection data set
+# create data set from unemployment.csv
 
 unemployment_data = 
   
-  read.csv("./unemployment.csv")
+  read.csv("./unemployment.csv") 
 
-view(unemployment_data)
+# create a new data set where jan:dec become names in a column called month and their values are assigned to a column called unemployment_percent
 
-# switch wide into long
+unemployment_tidy = pivot_longer(unemployment_data, Jan:Dec, names_to = "Month", values_to = "unemployment_percent") %>%
 
-# ensure key variables have the same names
-
-# ensure key variables take the same values
+view(unemployment_tidy)
 
 ```
 
 Now, we can join the three data sets we have just created.
 
 ```{r}
+# create a new dataset joining snp_data and pols_month_data
 
-#join snp_data into pols_month and then merge unemployment_data into the result
+snp_pols =
+  full_join(snp_data, pols_month_data)
+
+# create a new dataset joining snp_pols and unemployment_tidy
+
+snp_pols_unemployment =
+  full_join(snp_pols, unemployment_tidy)
 
 ```
 
-Write a paragraph about the dataset- explain what each data set contained, and describe the resulting set: give the dimension, range of years, and names of key variables
+This dataset, _snp_pols_unemployment_, now contains a merged version of the three **FiveThirtyEight** datasets.
+Snp_pols contained S&P closing value data for each assoicated date. pols_month_data included observations regarding political affiliation of incumbent politicians. unemployment_data included percentage unemployment by month for each affiliated year. Key variables include month, year, unemployment percent, president, and close. 
 
 
 
