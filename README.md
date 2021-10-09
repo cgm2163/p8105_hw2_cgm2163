@@ -9,3 +9,4 @@ Update 3 to Homework 2 includes a completed problem 1 and 2, and an outline for 
 
 Update 4 to Homework 2 includes completed problems 1, 2, and 3, without the Mr. Trash Wheel data update
 
+Final Update to Homework 2 includes updated Mr. Trash Wheel data and completed problems 1, 2, and 3

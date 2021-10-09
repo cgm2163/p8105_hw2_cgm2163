@@ -5,7 +5,7 @@ output: html_document
 
 # Problem 1
 
-After creating a public GitHub repo and local R project, we should upload the _tidyverse_ library.
+After creating a public GitHub repo and local R project, we should upload the _tidyverse_ library. This lets us carry out many functions throughout the document.
 
 ```{r}
 
@@ -23,7 +23,7 @@ library(readxl)
 
 trash_wheel_data = 
   
-  read_excel("./Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = 1) %>%
+  read_excel("./Trash-Wheel-Collection-Totals-7-2020-2.xlsx", sheet = 1) %>%
   
   # convert names to lower case snake case
   
@@ -51,7 +51,7 @@ library(readxl)
 
 # read the 2018 precipitation data sheet, skipping the first row and beginning columns are titles
 
-precip_18 = read_excel("./Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = ("2018 Precipitation"), skip = 1, col_names = TRUE) %>%
+precip_18 = read_excel("./Trash-Wheel-Collection-Totals-7-2020-2.xlsx", sheet = ("2018 Precipitation"), skip = 1, col_names = TRUE) %>%
       
       #rename the variable "Total" as "precipitation_inches"
   
@@ -73,7 +73,7 @@ Then, we can upload and clean the **precipitation data** from _2019_.
 
 # read the 2019 precipitation data sheet, skipping the first row and beginning columns are titles
 
-precip_19 = read_excel("./Trash-Wheel-Collection-Totals-8-6-19.xlsx", 
+precip_19 = read_excel("./Trash-Wheel-Collection-Totals-7-2020-2.xlsx", 
       sheet = ("2019 Precipitation"), skip = 1, col_names = TRUE) %>%
   
   
@@ -81,7 +81,7 @@ precip_19 = read_excel("./Trash-Wheel-Collection-Totals-8-6-19.xlsx",
   
     rename(precipitation_inches = Total) %>%
   
-    #create a variable called year that is equal to 2019 for all               values
+    #create a variable called year that is equal to 2019 for all values
   
     mutate(year = 2019) %>%
   
@@ -111,7 +111,8 @@ Key variables include dumpster number, month, date, and number of cigarette
 butts, plastic bottles, and other trash collected.
 
 
-The median number of sports balls in a dumpster in 2019 was `r median(trash_wheel_data$sport_ball[trash_wheel_data$year == 2019]) `.
+The median number of sports balls in a dumpster in 2019 was
+`r median(trash_wheel_data$sport_ball[trash_wheel_data$year == 2019]) `
 
 In _precip_18_19_, there are `r count(precip_18_19)` observations. Key variables 
 include month, year, and precipitation inches. The total precipitation in 2018 was `r sum(precip_18_19$precipitation_inches[precip_18_19$year == 2018]) ` inches.
@@ -183,7 +184,6 @@ snp_data =
   
   select(-day, -close, everything())
   
-view(snp_data)
 
 # arrange dates similar to as above year and month should be leading columns
 
