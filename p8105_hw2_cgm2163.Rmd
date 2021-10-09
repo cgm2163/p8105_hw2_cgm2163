@@ -218,7 +218,8 @@ snp_pols =
 # create a new dataset joining snp_pols and unemployment_tidy
 
 snp_pols_unemployment =
-  full_join(snp_pols, unemployment_tidy)
+  full_join(snp_pols, unemployment_tidy) %>%
+  janitor::clean_names()
 
 ```
 
@@ -233,35 +234,87 @@ The **NYC Open dataset** on _baby name popularity_ can be assessed by uploading 
 
 ```{r}
 
-# read sheet 1 of the trash wheel collection data set
+
+# create data set based on popular baby names
+
+library(plyr)
 
 baby_names_data = 
   
-  read.csv("./Popular_Baby_Names.csv")
+  read.csv("./Popular_Baby_Names.csv") %>%
+  
+  # clean variable names
+  
+  janitor::clean_names() %>%
+  
+  # create new variable called names that alters all instances of   child_s_first_name to completely uppercase
+  
+  mutate(names = casefold(child_s_first_name, upper = T)) %>%
+  
+  # keep only rows where there are distinct values
+  
+  distinct(year_of_birth, ethnicity, names, .keep_all = TRUE) %>%
 
-view(baby_names_data)
+  # create new variable normalizing format of ethnicity
+  
+  mutate(new_ethnicity = recode(ethnicity, "BLACK NON HISP" = "BLACK NON HISPANIC", "ASIAN AND PACI" = "ASIAN AND PACIFIC ISLANDER", "WHITE NON HISP" = "WHITE NON HISPANIC")) %>%
+  
+  # remove child_s_first_name and ethnicity, made redundant by addition of names and new_ethnicity
 
-# names of a categorical predicor and case structure of string variables has changed over time- needs to be fixed
-
-#some rows seem duplicated, which need to be removed (google "dplyr remove duplicate rows" to get started)
+   select(-child_s_first_name, -ethnicity)
 
 ```
 
-Next, we can do some analysis:
+Next, we can create tables and graphs!
 
 ```{r}
 
-# produce a reader-friendly table showing the rank in popularity of the name "olivia" as a female baby name over time; needs rows for ethnicities and columns for year
+#create a table that displays the rank in popularity of the name "Olivia" as a female baby name over time
+  
+baby_names_data %>%
+  filter(names == "OLIVIA", gender == "FEMALE") %>%
+  group_by(year_of_birth, rank, new_ethnicity) %>%
+  knitr::kable(digits = 1)
+```
 
-#produce similar table showing most popular name among male children over time
+Now, let's analyze a table on male baby names
 
-#for male, white non-hispanic children born in 2016, produce a scatter plot showing the number of children with a name (y axis) against the rank in popularity of that name (x axis)
+
+```{r}
+#create a table that displays the most popular male baby name of each year by ethnicity
+
+baby_new <- subset(baby_names_data, gender != "FEMALE") %>%
+  select(-gender)
+
+baby_new %>%
+  filter(rank == 1) %>%
+  group_by(year_of_birth, rank, new_ethnicity) %>%
+  knitr::kable(digits = 1)
+
+```
+Finally, we can make a scatterplot!
+
+```{r}
+  # create data set where only white, non hispanic males
+  
+baby_new_2 <- subset(baby_new, new_ethnicity == "WHITE NON HISPANIC")
+                     
+# create a scatterplot showing the number of children with a name (count) against the rank in popularity of that name (rank)
+
+baby_new_2 %>%
+  ggplot(aes(x = rank, y = count)) +
+  geom_point(aes(color = new_ethnicity), alpha = .5) +
+  labs(
+    title = "White Non Hispanic Males",
+    x = "name rank",
+    y = "count of name",
+    caption = "Data from NYC Open Dataset"
+  )
+
 
 
 ```
 
 
 
-
-
-
+**End of Homework 2**
